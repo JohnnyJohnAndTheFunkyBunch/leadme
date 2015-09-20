@@ -17,7 +17,7 @@
     <link href="static/css/bootstrap.min.css?2" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="static/css/landing-page.css?54" rel="stylesheet">
+    <link href="static/css/landing-page.css?59" rel="stylesheet">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -73,18 +73,21 @@
         <div class="col-sm-3 sidebar">
           <ol>
             <li>
-              Mango Chutney<br>
-              <span class="type">Restaurant</span>
+              Mango Chutney
             </li>
 
             <li>
-              Times Square<br>
-              <span class="type">Restaurant</span>
+              Times Square
             </li>
 
             <li>
-              Mango Chutney<br>
-              <span class="type">Restaurant</span>
+              Mango Chutney
+            </li>
+            <li>
+              Mango Chutney
+            </li>
+            <li>
+              Mango Chutney
             </li>
           </ol>
         </div>
@@ -412,6 +415,7 @@ function loadContent(content) {
   for (i = 0; i < 6; i++) {
     console.log(content[i]["place"]["name"])
     $('.card .card-title').eq(i).text(content[i]["place"]["name"])
+    $('li').eq(i).text(content[i]["place"]["name"])
     $('.card .card-text').eq(i).text("\"" + content[i]["place"]["snippet_text"] + "\"")
     $('.card .dd_address').eq(i).html(content[i]["place"]["location"]["display_address"][0] + "<br>" +
 content[i]["place"]["location"]["display_address"][1] + "<br>" +

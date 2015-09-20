@@ -25,8 +25,8 @@ class Main(tornado.web.RequestHandler):
      
 application = tornado.web.Application([
     (r"/", Main),
-    (r"/discover",GetRating),
-    (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "/Users/jma/Code/adventure/static"}),
+    (r"/discover",GetFake),
+    (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "/home/ubuntu/leadme/static"}),
 ],debug=True)
 
 if __name__ == "__main__":
