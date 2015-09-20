@@ -25,11 +25,11 @@ class Main(tornado.web.RequestHandler):
      
 application = tornado.web.Application([
     (r"/", Main),
-    (r"/discover",GetFake),
+    (r"/discover",GetRating),
     (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "/home/ubuntu/leadme/static"}),
 ],debug=True)
 
 if __name__ == "__main__":
     print "Listening..."
-    application.listen(8888)
+    application.listen(sys.argv[1])
     tornado.ioloop.IOLoop.instance().start()

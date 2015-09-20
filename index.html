@@ -17,7 +17,7 @@
     <link href="static/css/bootstrap.min.css?2" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="static/css/landing-page.css?59" rel="stylesheet">
+    <link href="static/css/landing-page.css?61" rel="stylesheet">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -71,7 +71,17 @@
     <div class="container" id="main-content">
       <div class="row">
         <div class="col-sm-3 sidebar">
-          <ol>
+          <div class="backtrack">
+          <p class="wtv">Looking for a new adventure?<p>
+             <form id="goform2">
+               <div class="form-group">
+                 <input type="location" class="form-control" id="location_input2" placeholder="New Address">
+               </div>
+             </form>
+          </div>
+          <div class="itinerary">
+          <h6>Itinerary</h6>
+          <ul>
             <li>
               Mango Chutney
             </li>
@@ -89,7 +99,8 @@
             <li>
               Mango Chutney
             </li>
-          </ol>
+          </ul>
+          </div>
         </div>
 
         <div class="col-sm-9">
@@ -465,6 +476,30 @@ function loadUber(content) {
 $( "#goform" ).submit(function( event ) {
   event.preventDefault();
   value_string = $('#location_input').val();
+  $(".loading-image").show();
+    $.getJSON("discover?address="+value_string,
+        function(result) {
+          console.log(result);
+          if ("error" in result) {
+            alert("Address not found, please try again");
+            $(".loading-image").hide();
+          } else {
+            start_address = value_string
+            content = result;
+            loadContent(content);
+            loadUber(content);
+            $(".loading-image").hide();
+            // do stuff here, fill in
+            $("#main-header").show();
+            $("#main-content").show();
+            $(".intro-header").hide();
+          }
+        }
+    );
+  });
+$( "#goform2" ).submit(function( event ) {
+  event.preventDefault();
+  value_string = $('#location_input2').val();
   $(".loading-image").show();
     $.getJSON("discover?address="+value_string,
         function(result) {
