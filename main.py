@@ -3,6 +3,7 @@ import oauth2
 import urllib
 import urllib2
 import json
+import unicodedata
 from random import randint
 
 url = 'https://api.uber.com/v1/products'
@@ -14,7 +15,6 @@ TOKEN_SECRET = 'rcoqfwZeJ6LJr31cbWBdoty91J8'
 API_HOST = 'api.yelp.com'
 DEFAULT_TERM = 'dinner'
 DEFAULT_LOCATION = 'San Francisco, CA'
-SEARCH_LIMIT = 3
 SEARCH_PATH = '/v2/search/'
 BUSINESS_PATH = '/v2/business/'
 
@@ -28,6 +28,10 @@ parameters = {
 
 #data = response.json()
 
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
+
 def uberEstimate(start_lat, start_long, end_lat, end_long):
   parameters = {
     'server_token': 'LrrQZVjHygsr0Km2wez9KcWHYkB1FoPP-x_PGr1x',
@@ -38,6 +42,8 @@ def uberEstimate(start_lat, start_long, end_lat, end_long):
   }
   response = requests.get('https://api.uber.com/v1/estimates/price', params=parameters)
   data = response.json()
+  if "prices" not in data:
+    return {'price':0, 'duration':0}
   for i in data["prices"]:
     if i["display_name"] == 'uberX':
       return {'price':i["low_estimate"], 'duration': i['duration']}
@@ -153,7 +159,7 @@ def yelpPlaces(location, start_lat, start_long, category):
 # name, image_url, url, display_phone, snippet_text, location.display_address, location
 
 def yelpFood(location, start_lat, start_long, term=""):
-    data = search("food " + term, location, start_lat, start_long, 1000, 0)
+    data = search("food " + term, location, start_lat, start_long, 10000, 0)
     # implementa random len(data["businesses"])
     business_id = data["businesses"][randint(0,len(data["businesses"]) - 1)]["id"]
     return business_ye(business_id)
@@ -169,33 +175,43 @@ def jsonOutput(start_location):
   output = []
   address = start_location
   coord = addressToCoord(start_location)
+  start_address = address
+  if coord == []:
+    return {"error": "Address not found"}
+    
   business = yelpPlaces(address, coord['lat'], coord['lng'], "active")
-  output.append(business)
+  coord2 = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
+  output.append({"place":business, "uber":uberEstimate(coord['lat'],coord['lng'], coord2['lat'], coord2['lng'] )})
 
-  address = ', '.join(business['location']['display_address'])
+  address = strip_accents(', '.join(business['location']['display_address']))
   coord = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
   business = yelpFood(address, coord['lat'], coord['lng'])
-  output.append(business)
+  coord2 = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
+  output.append({"place":business, "uber":uberEstimate(coord['lat'],coord['lng'], coord2['lat'], coord2['lng'] )})
 
-  address = ', '.join(business['location']['display_address'])
+  address = strip_accents(', '.join(business['location']['display_address']))
   coord = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
   business = yelpPlaces(address, coord['lat'], coord['lng'], "arts")
-  output.append(business)
+  coord2 = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
+  output.append({"place":business, "uber":uberEstimate(coord['lat'],coord['lng'], coord2['lat'], coord2['lng'] )})
 
-  address = ', '.join(business['location']['display_address'])
+  address = strip_accents(', '.join(business['location']['display_address']))
   coord = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
   business = yelpFood(address, coord['lat'], coord['lng'])
-  output.append(business)
+  coord2 = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
+  output.append({"place":business, "uber":uberEstimate(coord['lat'],coord['lng'], coord2['lat'], coord2['lng'] )})
 
-  address = ', '.join(business['location']['display_address'])
+  address = strip_accents(', '.join(business['location']['display_address']))
   coord = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
   business = yelpPlaces(address, coord['lat'], coord['lng'], "nightlife")
-  output.append(business)
+  coord2 = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
+  output.append({"place":business, "uber":uberEstimate(coord['lat'],coord['lng'], coord2['lat'], coord2['lng'] )})
 
-  address = ', '.join(business['location']['display_address'])
+  address = strip_accents(', '.join(business['location']['display_address']))
   coord = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
   business = yelpPlaces(address, coord['lat'], coord['lng'], "bars,danceclubs")
-  output.append(business)
+  coord2 = {'lat': business['location']['coordinate']['latitude'], 'lng': business['location']['coordinate']['longitude']}
+  output.append({"place":business, "uber":uberEstimate(coord['lat'],coord['lng'], coord2['lat'], coord2['lng'] )})
 
   return output
 
@@ -206,8 +222,10 @@ def addressToCoord(address):
   }
   response = requests.get('https://maps.googleapis.com/maps/api/geocode/json', params=parameters)
   data = response.json()
+  if not data['results']:
+    return []
   return data['results'][0]['geometry']['location']
 
-print jsonOutput("2580 El Camino Real Redwood")
+#print jsonOutput("2580 El Camino Real Redwood")
 
 # name, image_url, url, display_phone, snippet_text, location.display_address, location
